@@ -52,6 +52,45 @@ void HAL_init() {
   #endif
 }
 
+// Jan 30 2020 -- implemented digitalRead and digitalWrite which will vastly improve the performance of the HAL layer here
+// Warning -- This is deemed unsafe :) make sure you have the correct #Defines for these to take effect :)
+#ifdef __FAST_DIGITAL_OPS
+
+/**
+ * digitalRead -- Faster implementation which will save a few cycles for reads and writes
+ *                Please note that this is only for Arduino platforms with AVR
+ * See original Arduino AVR implementation here: https://github.com/arduino/ArduinoCore-avr/blob/master/cores/arduino/wiring_digital.c#L165
+ */
+void digitalRead(uint8_t pin) {
+	uint8_t bit = digitalPinToBitMask(pin);
+	uint8_t port = digitalPinToPort(pin);
+  if (*portInputRegister(port) & bit) return HIGH;
+	return LOW;
+}
+
+/**
+ * digitalWrite -- Faster implementation which will save a few cycles for writes
+ *                Please note that this is only for Arduino platforms with AVR
+ * See original Arduino AVR implementation here: https://github.com/arduino/ArduinoCore-avr/blob/master/cores/arduino/wiring_digital.c#L138
+ */
+void digitalWrite(uint8_t pin, uint8_t val) {
+  // Skip the pin to timer, Skip the pin to port
+  uint8_t port = digitalPinToPort(pin);
+  volatile uint8_t *out = portOutputRegister(port);
+  
+  uint8_t oldSREG = SREG;
+  __asm__ __volatile__ ("cli");
+  if (val == LOW) {
+	 *out &= ~bit;
+	} else {
+	 *out |= bit;
+	}
+  SREG = oldSREG;
+  
+}
+
+#endif
+
 #if ENABLED(SDSUPPORT)
 
   #include "../../sd/SdFatUtil.h"
