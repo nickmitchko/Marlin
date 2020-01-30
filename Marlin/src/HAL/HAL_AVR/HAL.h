@@ -413,3 +413,21 @@ void set_pwm_frequency(const pin_t pin, int f_desired);
  *  Optionally allows changing the maximum size of the provided value to enable finer PWM duty control [default = 255]
  */
 void set_pwm_duty(const pin_t pin, const uint16_t v, const uint16_t v_size=255, const bool invert=false);
+
+#ifdef __FAST_DIGITAL_OPS
+
+/**
+ * digitalRead -- Faster implementation which will save a few cycles for reads and writes
+ *                Please note that this is only for Arduino platforms with AVR
+ * See original Arduino AVR implementation here: https://github.com/arduino/ArduinoCore-avr/blob/master/cores/arduino/wiring_digital.c#L165
+ */
+void digitalRead(uint8_t pin);
+
+/**
+ * digitalWrite -- Faster implementation which will save a few cycles for writes
+ *                Please note that this is only for Arduino platforms with AVR
+ * See original Arduino AVR implementation here: https://github.com/arduino/ArduinoCore-avr/blob/master/cores/arduino/wiring_digital.c#L138
+ */
+void digitalWrite(uint8_t pin, uint8_t val);
+
+#endif
